@@ -47,13 +47,29 @@ public class NewsArticleController : ControllerBase
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string? title, [FromQuery] short? categoryId)
     {
-        var query = _context.NewsArticles
-            .Include(n => n.Category)
-            .Include(n => n.Tags)
-            .AsQueryable();
+        var query = _context.NewsArticles.AsQueryable();
         if (!string.IsNullOrEmpty(title)) query = query.Where(n => n.NewsTitle!.Contains(title));
         if (categoryId.HasValue) query = query.Where(n => n.CategoryId == categoryId);
-        return Ok(await query.ToListAsync());
+        
+        var data = await query
+            .Select(n => new {
+                n.NewsArticleId,
+                n.NewsTitle,
+                n.Headline,
+                n.NewsContent,
+                n.NewsSource,
+                n.CategoryId,
+                CategoryName = n.Category != null ? n.Category.CategoryName : null,
+                n.NewsStatus,
+                n.CreatedDate,
+                n.ModifiedDate,
+                n.CreatedById,
+                n.UpdatedById,
+                Tags = n.Tags.Select(t => new { t.TagId, t.TagName, t.Note }).ToList()
+            })
+            .ToListAsync();
+            
+        return Ok(data);
     }
 
     // Staff: xem lịch sử bài viết của mình
