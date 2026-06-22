@@ -3,6 +3,7 @@ using API.DTOs;
 using DAOs.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -17,8 +18,11 @@ public class CategoryController : ControllerBase
     public CategoryController(FUNewsManagementContext context) => _context = context;
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-        => Ok(await _context.Categories.ToListAsync());
+    [EnableQuery]
+    public ActionResult<IQueryable<Category>> GetAll()
+    {
+        return Ok(_context.Categories);
+    }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(short id)

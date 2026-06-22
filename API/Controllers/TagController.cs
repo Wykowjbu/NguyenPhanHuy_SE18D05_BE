@@ -3,6 +3,7 @@ using API.DTOs;
 using DAOs.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
@@ -16,8 +17,11 @@ public class TagController : ControllerBase
     public TagController(FUNewsManagementContext context) => _context = context;
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-        => Ok(await _context.Tags.ToListAsync());
+    [EnableQuery]
+    public ActionResult<IQueryable<Tag>> GetAll()
+    {
+        return Ok(_context.Tags);
+    }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)

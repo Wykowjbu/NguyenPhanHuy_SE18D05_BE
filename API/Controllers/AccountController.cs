@@ -3,6 +3,7 @@ using API.DTOs;
 using DAOs.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
@@ -17,10 +18,10 @@ public class AccountController : ControllerBase
     public AccountController(FUNewsManagementContext context) => _context = context;
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    [EnableQuery]
+    public ActionResult<IQueryable<SystemAccount>> GetAll()
     {
-        var accounts = await _context.SystemAccounts.ToListAsync();
-        return Ok(accounts);
+        return Ok(_context.SystemAccounts);
     }
 
     [HttpGet("{id}")]
