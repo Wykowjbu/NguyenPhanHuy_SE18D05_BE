@@ -3,6 +3,7 @@ using API.DTOs;
 using DAOs.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -17,56 +18,19 @@ public class NewsArticleController : ControllerBase
 
     // Public: xem bài active (không cần đăng nhập)
     [HttpGet("public")]
-    public async Task<IActionResult> GetPublic()
+    [EnableQuery]
+    public ActionResult<IQueryable<NewsArticle>> GetPublic()
     {
-        var news = await _context.NewsArticles
-            .Include(n => n.Category)
-            .Include(n => n.Tags)
-            .Where(n => n.NewsStatus == true)
-            .Select(n => new
-            {
-                n.NewsArticleId,
-                n.NewsTitle,
-                n.Headline,
-                n.NewsSource,
-                n.NewsContent,
-                n.NewsStatus,
-                n.CreatedDate,
-                CategoryName = n.Category != null ? n.Category.CategoryName : null,
-                Tags = n.Tags.Select(t => new { t.TagId, t.TagName, t.Note })
-            })
-            .ToListAsync();
-        return Ok(news);
+        return Ok(_context.NewsArticles.Where(n => n.NewsStatus == true));
     }
 
     // Lấy tất cả (có auth)
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetAll()
+    [EnableQuery]
+    public ActionResult<IQueryable<NewsArticle>> GetAll()
     {
-        var news = await _context.NewsArticles
-            .Include(n => n.Category)
-            .Include(n => n.CreatedBy)
-            .Include(n => n.Tags)
-            .Select(n => new
-            {
-                n.NewsArticleId,
-                n.NewsTitle,
-                n.Headline,
-                n.NewsContent,
-                n.NewsSource,
-                n.CategoryId,
-                n.NewsStatus,
-                n.CreatedDate,
-                n.ModifiedDate,
-                n.CreatedById,
-                n.UpdatedById,
-                CategoryName = n.Category != null ? n.Category.CategoryName : null,
-                CreatedByName = n.CreatedBy != null ? n.CreatedBy.AccountName : null,
-                Tags = n.Tags.Select(t => new { t.TagId, t.TagName, t.Note })
-            })
-            .ToListAsync();
-        return Ok(news);
+        return Ok(_context.NewsArticles);
     }
 
     [HttpGet("{id}")]
