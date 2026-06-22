@@ -47,10 +47,11 @@ public class AccountController : ControllerBase
             return BadRequest(new { message = "Email đã tồn tại." });
 
         // Tự sinh ID: lấy max ID hiện tại + 1
-        var nextId = (short)(await _context.SystemAccounts
-            .Select(a => (int)a.AccountId)
-            .DefaultIfEmpty(0)
-            .MaxAsync() + 1);
+        short nextId = 1;
+        if (await _context.SystemAccounts.AnyAsync())
+        {
+            nextId = (short)(await _context.SystemAccounts.MaxAsync(a => a.AccountId) + 1);
+        }
 
         var acc = new SystemAccount
         {

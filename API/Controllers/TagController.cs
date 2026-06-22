@@ -35,10 +35,11 @@ public class TagController : ControllerBase
     public async Task<IActionResult> Create([FromBody] TagDTO dto)
     {
         // Tự sinh ID: lấy max ID hiện tại + 1
-        var nextId = await _context.Tags
-            .Select(t => t.TagId)
-            .DefaultIfEmpty(0)
-            .MaxAsync() + 1;
+        int nextId = 1;
+        if (await _context.Tags.AnyAsync())
+        {
+            nextId = await _context.Tags.MaxAsync(t => t.TagId) + 1;
+        }
 
         var tag = new Tag
         {
